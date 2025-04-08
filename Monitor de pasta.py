@@ -312,7 +312,7 @@ def set_more_than_100(status_label, log_text):
     files_to_wait = 5
     zip_mode = False
     zip_company_name = None
-    log_text.insert(tk.END, "Configurado para 'Com Movimento mais que 100' (5 arquivos).\n")
+    log_text.insert(tk.END, "Configurado para 'Com Movimento maior que 100' (5 arquivos).\n")
     log_text.see(tk.END)
     status_label.config(text=f"Monitorando... (0/{files_to_wait} arquivos detectados)" if thread_ref[0] and thread_ref[0].is_alive() else "Parado")
 
@@ -345,71 +345,56 @@ def reset_zip_mode(status_label, log_text):
 
 def main():
     global thread_ref, DOWNLOADS_PATH
-    # Garante que o Tkinter funcione corretamente no .exe
     root = tk.Tk()
-    root.title("Monitor de Pasta")
-    root.geometry("480x530")
-    
-    status_label = tk.Label(root, text="Parado", font=("Arial", 12, "bold"))
-    status_label.pack(pady=10)
-    
-    log_text = tk.Text(root, height=10, width=50, font=("Arial", 10))
-    log_text.pack(pady=10)
-    
+    root.title("📂 Monitor de Pasta - JETTAX")
+    root.geometry("700x680")
+
+    frame_top = tk.Frame(root)
+    frame_top.pack(pady=10)
+
+    status_label = tk.Label(frame_top, text="⏹️ Parado", font=("Segoe UI", 13, "bold"))
+    status_label.pack()
+
+    frame_log = tk.Frame(root)
+    frame_log.pack(pady=10)
+
+    log_text = tk.Text(frame_log, height=18, width=80, font=("Consolas", 10), wrap=tk.WORD, relief=tk.SOLID, bd=1)
+    log_text.pack(padx=10, pady=5)
+
     # Tenta determinar a pasta de downloads
     try:
         DOWNLOADS_PATH = get_downloads_path(root)
-        log_text.insert(tk.END, f"Pasta de downloads detectada: {DOWNLOADS_PATH}\n")
-        log_text.insert(tk.END, "Aplicativo iniciado com sucesso.\n")
+        log_text.insert(tk.END, f"📥 Pasta de downloads detectada: {DOWNLOADS_PATH}\n")
+        log_text.insert(tk.END, "✅ Aplicativo iniciado com sucesso.\n")
         log_text.see(tk.END)
     except FileNotFoundError as e:
-        log_text.insert(tk.END, f"Erro: {e}\n")
+        log_text.insert(tk.END, f"❌ Erro: {e}\n")
         log_text.see(tk.END)
-        status_label.config(text="Erro: Pasta de downloads não encontrada")
+        status_label.config(text="🚫 Erro: Pasta de downloads não encontrada")
         root.update()
         root.destroy()
         return
-    
+
     stop_event = Event()
     thread_ref = [None]
-    
-    start_button = tk.Button(root, text="Iniciar Monitoramento", 
-                           command=lambda: start_monitoring(stop_event, thread_ref, status_label, log_text))
-    start_button.pack(pady=5)
-    
-    stop_button = tk.Button(root, text="Parar Monitoramento", 
-                          command=lambda: stop_monitoring(stop_event, status_label))
-    stop_button.pack(pady=5)
-    
-    clear_button = tk.Button(root, text="Limpar Log", 
-                           command=lambda: clear_log(log_text))
-    clear_button.pack(pady=5)
-    
-    less_than_100_button = tk.Button(root, text="Com Movimento menor que 100", 
-                                   command=lambda: set_less_than_100(status_label, log_text))
-    less_than_100_button.pack(pady=5)
-    
-    more_than_100_button = tk.Button(root, text="Com Movimento mais que 100", 
-                                   command=lambda: set_more_than_100(status_label, log_text))
-    more_than_100_button.pack(pady=5)
-    
-    no_movement_button = tk.Button(root, text="Sem Movimento", 
-                                 command=lambda: set_no_movement(status_label, log_text))
-    no_movement_button.pack(pady=5)
-    
-    zip_button = tk.Button(root, text="Processar ZIPs", 
-                          command=lambda: set_zip_mode(status_label, log_text))
-    zip_button.pack(pady=5)
-    
-    zip_reset_button = tk.Button(root, text="Resetar ZIP", 
-                                command=lambda: reset_zip_mode(status_label, log_text))
-    zip_reset_button.pack(pady=5)
-    
+
+    frame_buttons = tk.Frame(root)
+    frame_buttons.pack(pady=10)
+
+    button_pad = {'padx': 5, 'pady': 3, 'fill': 'x'}
+
+    tk.Button(frame_buttons, text="▶️ Iniciar Monitoramento", command=lambda: start_monitoring(stop_event, thread_ref, status_label, log_text)).pack(**button_pad)
+    tk.Button(frame_buttons, text="⏹️ Parar Monitoramento", command=lambda: stop_monitoring(stop_event, status_label)).pack(**button_pad)
+    tk.Button(frame_buttons, text="🧹 Limpar Log", command=lambda: clear_log(log_text)).pack(**button_pad)
+    tk.Button(frame_buttons, text="📉 Movimento < 100", command=lambda: set_less_than_100(status_label, log_text)).pack(**button_pad)
+    tk.Button(frame_buttons, text="📈 Movimento > 100", command=lambda: set_more_than_100(status_label, log_text)).pack(**button_pad)
+    tk.Button(frame_buttons, text="📄 Sem Movimento", command=lambda: set_no_movement(status_label, log_text)).pack(**button_pad)
+    tk.Button(frame_buttons, text="🗜️ Processar ZIPs", command=lambda: set_zip_mode(status_label, log_text)).pack(**button_pad)
+    tk.Button(frame_buttons, text="🔁 Resetar ZIP", command=lambda: reset_zip_mode(status_label, log_text)).pack(**button_pad)
+
     root.mainloop()
 
 if __name__ == "__main__":
-    # Garante que o .exe funcione corretamente
     if getattr(sys, 'frozen', False):
-        # Se for um .exe, ajusta o caminho pra recursos
         os.chdir(sys._MEIPASS)
     main()
